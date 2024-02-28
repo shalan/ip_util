@@ -17,7 +17,7 @@
 
 ## A Typical Workflow
 
-1. Describe the IP in YAML or JSON format. The format is outlined in the following section. To make things easier, ```v2yaml.py``` may be used to generate a template YAML file from the IP RTL Verilog file with some of the sections filled aautomatically for you.
+1. Describe the IP in YAML or JSON format. The format is outlined in the following section. To make things easier, ```v2yaml.py``` may be used to generate a template YAML file from the IP RTL Verilog file with some of the sections filled automatically for you.
 
 2. [Optional] Convert the YAML file into JSON using tools such as [this one](https://onlineyamltools.com/convert-yaml-to-json).
 
@@ -78,7 +78,7 @@ info:
 
 ### Parameter Definitions
 
-This section is used if the IP RTL model is parameterized. The parameters defined in this section can be used in other sections to specify width of fields and registers.
+This section is used if the IP RTL model is parameterized. The parameters defined in this section can be used in other sections to specify the width of fields and registers.
 
 ```YAML
 parameters:
@@ -167,9 +167,9 @@ registers:
 - The ``mode`` property can be set to: 
   - ``w`` for registers that are meant for writing only; reading from it returns the last written data value.
   - ``r`` for registers that are meant for reading only; hence they cannot be written. 
-  - ``rw`` for registers that are read and written differently; for an example, the data register of a GPIO peripheral. Reading this register returns the data provided on input GPIO pins and writting the register sets the values of output GPIO pins.
+  - ``rw`` for registers that are read and written differently; for example, the data register of a GPIO peripheral. Reading this register returns the data provided on input GPIO pins and writing the register sets the values of output GPIO pins.
 
-- The ``bit_access`` property is used to enable bit level access (Not implemented functionality).
+- The ``bit_access`` property is used to enable bit-level access (Not implemented functionality).
 - The ``fifo`` property is used to specify whether this register is used to access a FIFO. If it is set to ``yes`` the FIFO has to be defined.
 
 ### FIFO Definitions
@@ -193,7 +193,7 @@ fifos:
 
 ### Event Flag Definitions
 
-Event flags used for generating interrupts. For an example:
+Event flags are used for generating interrupts. For an example:
 
 ```yaml
 flags:

@@ -58,7 +58,7 @@ print(f"""info:
   type: <soft|hard|firm>
   status: <verified|fpga|silicon>
   qualification: <Comm|Ind|Automotive|Mil>
-  cell_count: "<count>
+  cell_count: <count>
   width: <width>
   height: <height>
   technology: <tech>

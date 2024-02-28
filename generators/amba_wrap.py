@@ -248,47 +248,48 @@ def print_registers(bus_type):
     Returns:
         None
     """
-    for r in IP['registers']:     
-        if r['fifo'] is True:
-            print(f"\twire\t[{r['size']}-1:0]\t{r['name']}_WIRE;")
-        else:
-            if r['mode'] == 'rw':
-                # 'rw' registers cannot have field
-                print(f"\treg\t[{r['size']}-1:0]\t{r['name']}_REG;")
+    if "registers" in IP:
+        for r in IP['registers']:     
+            if r['fifo'] is True:
                 print(f"\twire\t[{r['size']}-1:0]\t{r['name']}_WIRE;")
-                print(f"\tassign\t{r['name']}_WIRE = {r['read_port']};")
-                print(f"\tassign\t{r['write_port']} = {r['name']}_REG;")
-                print(f"\t`{bus_type}_REG({r['name']}_REG, 0, 8)")
-            elif r['mode'] == 'w':
-                print(f"\treg [{r['size']}-1:0]\t{r['name']}_REG;")
-                if "fields" in r and "write_port" not in r:
-                    for f in r['fields']:
-                        if isinstance(f['bit_width'], int):
-                            to = f['bit_width'] + f['bit_offset'] - 1
-                        else:
-                            if f['bit_offset'] == 0:
-                                to = f"({f['bit_width']} - 1)"
-                            else:
-                                to = f"({f['bit_width']} + {f['bit_offset'] - 1})"
-                        print(f"\tassign\t{f['write_port']}\t=\t{r['name']}_REG[{to} : {f['bit_offset']}];")
-                else:
-                    print(f"\tassign\t{r['write_port']} = {r['name']}_REG;")
-                print(f"\t`{bus_type}_REG({r['name']}_REG, {r['init'] if 'init' in r else 0}, {r['size']})")
-            elif r['mode'] == 'r':
-                print(f"\twire [{r['size']}-1:0]\t{r['name']}_WIRE;")
-                if "fields" in r:
-                    for f in r['fields']:
-                        if isinstance(f['bit_width'], int):
-                            to = f['bit_width'] + f['bit_offset'] - 1
-                        else:
-                            if f['bit_offset'] == 0:
-                                to = f"({f['bit_width']} - 1)"
-                            else:
-                                to = f"({f['bit_width']} + {f['bit_offset'] - 1})"
-                        print(f"\tassign\t{r['name']}_WIRE[{to} : {f['bit_offset']}] = {f['read_port']};")
-                else:
+            else:
+                if r['mode'] == 'rw':
+                    # 'rw' registers cannot have field
+                    print(f"\treg\t[{r['size']}-1:0]\t{r['name']}_REG;")
+                    print(f"\twire\t[{r['size']}-1:0]\t{r['name']}_WIRE;")
                     print(f"\tassign\t{r['name']}_WIRE = {r['read_port']};")
-        
+                    print(f"\tassign\t{r['write_port']} = {r['name']}_REG;")
+                    print(f"\t`{bus_type}_REG({r['name']}_REG, 0, 8)")
+                elif r['mode'] == 'w':
+                    print(f"\treg [{r['size']}-1:0]\t{r['name']}_REG;")
+                    if "fields" in r and "write_port" not in r:
+                        for f in r['fields']:
+                            if isinstance(f['bit_width'], int):
+                                to = f['bit_width'] + f['bit_offset'] - 1
+                            else:
+                                if f['bit_offset'] == 0:
+                                    to = f"({f['bit_width']} - 1)"
+                                else:
+                                    to = f"({f['bit_width']} + {f['bit_offset'] - 1})"
+                            print(f"\tassign\t{f['write_port']}\t=\t{r['name']}_REG[{to} : {f['bit_offset']}];")
+                    else:
+                        print(f"\tassign\t{r['write_port']} = {r['name']}_REG;")
+                    print(f"\t`{bus_type}_REG({r['name']}_REG, {r['init'] if 'init' in r else 0}, {r['size']})")
+                elif r['mode'] == 'r':
+                    print(f"\twire [{r['size']}-1:0]\t{r['name']}_WIRE;")
+                    if "fields" in r:
+                        for f in r['fields']:
+                            if isinstance(f['bit_width'], int):
+                                to = f['bit_width'] + f['bit_offset'] - 1
+                            else:
+                                if f['bit_offset'] == 0:
+                                    to = f"({f['bit_width']} - 1)"
+                                else:
+                                    to = f"({f['bit_width']} + {f['bit_offset'] - 1})"
+                            print(f"\tassign\t{r['name']}_WIRE[{to} : {f['bit_offset']}] = {f['read_port']};")
+                    else:
+                        print(f"\tassign\t{r['name']}_WIRE = {r['read_port']};")
+            
         print()
         
 def get_port_width(port):
@@ -391,8 +392,9 @@ def print_registers_offsets(bus_type):
         None
     """
     # user defined registers
-    for r in IP['registers']:
-        print(f"\tlocalparam\t{r['name']}_REG_OFFSET = `{bus_type}_AW'd{r['offset']};")
+    if "registers" in IP:
+        for r in IP['registers']:
+            print(f"\tlocalparam\t{r['name']}_REG_OFFSET = `{bus_type}_AW'd{r['offset']};")
 
     # Interrupt registers
     print(f"\tlocalparam\tIM_REG_OFFSET = `{bus_type}_AW'd{IM_OFF};")
@@ -411,12 +413,13 @@ def print_rdata(bus_type):
     else:
         print(f"\tassign\tHRDATA = ")
     
-    for index,r in enumerate(IP['registers']):
-        if "r" in r['mode'] or r['fifo'] is True:
-            print(f"\t\t\t({prefix}ADDR[`{bus_type}_AW-1:0] == {r['name']}_REG_OFFSET)\t? {r['name']}_WIRE :")
-        else:
-            print(f"\t\t\t({prefix}ADDR[`{bus_type}_AW-1:0] == {r['name']}_REG_OFFSET)\t? {r['name']}_REG :")
-    
+    if "registers" in IP:
+        for index, r in enumerate(IP['registers']):
+            if "r" in r['mode'] or r['fifo'] is True:
+                print(f"\t\t\t({prefix}ADDR[`{bus_type}_AW-1:0] == {r['name']}_REG_OFFSET)\t? {r['name']}_WIRE :")
+            else:
+                print(f"\t\t\t({prefix}ADDR[`{bus_type}_AW-1:0] == {r['name']}_REG_OFFSET)\t? {r['name']}_REG :")
+
     if "flags" in IP:
         for r in IRQ_REGS:
             print(f"\t\t\t({prefix}ADDR[`{bus_type}_AW-1:0] == {r}_REG_OFFSET)\t? {r}_REG :")
